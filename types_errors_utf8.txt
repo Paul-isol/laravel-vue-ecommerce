@@ -1,0 +1,41 @@
+﻿node.exe : npm warn 
+Unknown project config 
+"public-hoist-pattern". 
+This will stop working in 
+the next major version of 
+npm. See `npm help npmrc` 
+for supported config 
+options.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\
+Users\isolp\AppData\Roaming
+\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (npm  
+   warn Unknow...config    
+ options.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+
+> types:check
+> vue-tsc --noEmit
+
+resources/js/pages/admin/brand/index.vue(49,44): error TS2353: Object literal may only specify known properties, and 'page' does not exist in type 'RouteQueryOptions'.
+resources/js/pages/admin/category/index.vue(49,48): error TS2353: Object literal may only specify known properties, and 'page' does not exist in type 'RouteQueryOptions'.
+resources/js/pages/admin/order/index.vue(45,44): error TS2353: Object literal may only specify known properties, and 'page' does not exist in type 'RouteQueryOptions'.
+resources/js/pages/admin/product/create.vue(132,89): error TS2322: Type '(v: boolean) => boolean' is not assignable to type '(value: boolean | "indeterminate") => any'.
+  Types of parameters 'v' and 'value' are incompatible.
+    Type 'string | boolean' is not assignable to type 'boolean'.
+      Type 'string' is not assignable to type 'boolean'.
+resources/js/pages/admin/product/edit.vue(143,89): error TS2322: Type '(v: boolean) => boolean' is not assignable to type '(value: boolean | "indeterminate") => any'.
+  Types of parameters 'v' and 'value' are incompatible.
+    Type 'string | boolean' is not assignable to type 'boolean'.
+      Type 'string' is not assignable to type 'boolean'.
+resources/js/pages/admin/product/index.vue(58,46): error TS2353: Object literal may only specify known properties, and 'page' does not exist in type 'RouteQueryOptions'.
+resources/js/pages/admin/user/index.vue(50,43): error TS2353: Object literal may only specify known properties, and 'page' does not exist in type 'RouteQueryOptions'.

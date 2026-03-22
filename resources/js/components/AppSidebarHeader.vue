@@ -23,5 +23,8 @@ withDefaults(
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </template>
         </div>
+        <div>
+            <h1 class="text-xl font-bold">Admin Dashboard</h1>
+        </div>
     </header>
 </template>

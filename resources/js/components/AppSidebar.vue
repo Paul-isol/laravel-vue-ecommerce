@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, FolderGit2, LayoutGrid, ListTree, Tags, ShoppingBag, ShoppingCart, Users } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -14,15 +14,63 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { toUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
+import admin from '@/routes/admin';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: admin.dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Shop',
+        href: admin.dashboard(),
+        icon: ShoppingBag,
+        children: [
+            {
+                title: 'Products',
+                href: admin.products.index(),
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Categories',
+                href: admin.categories.index(),
+                icon: ListTree,
+            },
+            {
+                title: 'Brands',
+                href: admin.brands.index(),
+                icon: Tags,
+            }
+        ]
+    },
+    {
+        title: 'Sales',
+        href: admin.dashboard(),
+        icon: ShoppingCart,
+        children: [
+            {
+                title: 'Orders',
+                href: admin.orders.index(),
+                icon: ShoppingCart,
+            }
+        ]
+    },
+    {
+        title: 'Customers',
+        href: admin.dashboard(),
+        icon: Users,
+        children: [
+            {
+                title: 'Users',
+                href: admin.users.index(),
+                icon: Users,
+            }
+        ]
+    }
 ];
 
 const footerNavItems: NavItem[] = [
@@ -45,7 +93,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="toUrl(dashboard())">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
