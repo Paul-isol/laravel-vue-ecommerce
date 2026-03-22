@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Edit, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,9 +60,22 @@ defineProps<{
     };
 }>();
 
+const itemToDeleteId = ref<number | null>(null);
+const isDeleteDialogOpen = ref(false);
+
 const deleteProduct = (id: number) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-        router.delete(toUrl(admin.products.destroy(id)));
+    itemToDeleteId.value = id;
+    isDeleteDialogOpen.value = true;
+};
+
+const confirmDelete = () => {
+    if (itemToDeleteId.value) {
+        router.delete(toUrl(admin.products.destroy(itemToDeleteId.value)), {
+            onFinish: () => {
+                isDeleteDialogOpen.value = false;
+                itemToDeleteId.value = null;
+            },
+        });
     }
 };
 
@@ -77,48 +101,129 @@ const onPageChange = (page: number) => {
                 </Button>
             </div>
 
-            <div class="rounded-md border bg-card">
+            <div
+                class="overflow-hidden rounded-xl border border-border/50 bg-background shadow-sm"
+            >
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[80px]">ID</TableHead>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Brand</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead class="text-right">Price</TableHead>
-                            <TableHead class="text-right">Qty</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead class="text-right">Actions</TableHead>
+                        <TableRow
+                            class="border-b-border/50 hover:bg-transparent"
+                        >
+                            <TableHead
+                                class="w-[80px] text-xs tracking-wider text-muted-foreground uppercase"
+                                >ID</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Title</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Brand</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Category</TableHead
+                            >
+                            <TableHead
+                                class="text-right text-xs tracking-wider text-muted-foreground uppercase"
+                                >Price</TableHead
+                            >
+                            <TableHead
+                                class="text-right text-xs tracking-wider text-muted-foreground uppercase"
+                                >Qty</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Status</TableHead
+                            >
+                            <TableHead
+                                class="text-right text-xs tracking-wider text-muted-foreground uppercase"
+                                >Actions</TableHead
+                            >
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="product in products.data" :key="product.id">
-                            <TableCell class="font-medium">{{ product.id }}</TableCell>
-                            <TableCell>{{ product.title }}</TableCell>
-                            <TableCell>{{ product.brand?.name ?? '—' }}</TableCell>
-                            <TableCell>{{ product.category?.name ?? '—' }}</TableCell>
-                            <TableCell class="text-right">${{ Number(product.price).toFixed(2) }}</TableCell>
-                            <TableCell class="text-right">{{ product.quantity }}</TableCell>
+                        <TableRow
+                            v-for="product in products.data"
+                            :key="product.id"
+                            class="border-b-border/50 transition-colors hover:bg-muted/40"
+                        >
+                            <TableCell
+                                class="text-xs font-medium text-muted-foreground"
+                            >
+                                #{{ product.id }}
+                            </TableCell>
+                            <TableCell class="font-medium text-foreground">
+                                {{ product.title }}
+                            </TableCell>
+                            <TableCell class="text-muted-foreground">
+                                {{ product.brand?.name ?? '—' }}
+                            </TableCell>
+                            <TableCell class="text-muted-foreground">
+                                {{ product.category?.name ?? '—' }}
+                            </TableCell>
+                            <TableCell class="text-right font-medium">
+                                ${{ Number(product.price).toFixed(2) }}
+                            </TableCell>
+                            <TableCell class="text-right text-muted-foreground">
+                                {{ product.quantity }}
+                            </TableCell>
                             <TableCell>
-                                <Badge :variant="product.published ? 'default' : 'secondary'">
-                                    {{ product.published ? 'Published' : 'Draft' }}
+                                <Badge
+                                    variant="outline"
+                                    :class="
+                                        product.published
+                                            ? 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                            : 'border-border/50 bg-muted/50 text-muted-foreground'
+                                    "
+                                    class="font-normal"
+                                >
+                                    {{
+                                        product.published
+                                            ? 'Published'
+                                            : 'Draft'
+                                    }}
                                 </Badge>
                             </TableCell>
                             <TableCell class="text-right">
-                                <div class="flex justify-end gap-2">
-                                    <Button variant="outline" size="icon" as-child>
-                                        <Link :href="toUrl(admin.products.edit(product.id))">
+                                <div
+                                    class="flex justify-end gap-1 opacity-80 transition-opacity hover:opacity-100"
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="
+                                                toUrl(
+                                                    admin.products.edit(
+                                                        product.id,
+                                                    ),
+                                                )
+                                            "
+                                        >
                                             <Edit class="h-4 w-4" />
                                         </Link>
                                     </Button>
-                                    <Button variant="destructive" size="icon" @click="deleteProduct(product.id)">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                        @click="deleteProduct(product.id)"
+                                    >
                                         <Trash2 class="h-4 w-4" />
                                     </Button>
                                 </div>
                             </TableCell>
                         </TableRow>
                         <TableRow v-if="products.data.length === 0">
-                            <TableCell colspan="8" class="h-24 text-center">
+                            <TableCell
+                                colspan="8"
+                                class="h-32 text-center text-muted-foreground"
+                            >
                                 No products found.
                             </TableCell>
                         </TableRow>
@@ -126,32 +231,91 @@ const onPageChange = (page: number) => {
                 </Table>
             </div>
 
-            <div class="flex justify-end mt-4">
-                <Pagination
-                    :total="products.total"
-                    :sibling-count="1"
-                    :items-per-page="products.per_page"
-                    :default-page="products.current_page"
-                    @update:page="onPageChange"
-                >
-                    <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
-                        <PaginationFirst />
-                        <PaginationPrevious />
+            <div class="mt-6 flex items-center justify-between px-2">
+                <div class="hidden text-sm text-muted-foreground sm:block">
+                    Showing total of
+                    <span class="font-medium text-foreground">{{
+                        products.total
+                    }}</span>
+                    products
+                </div>
 
-                        <template v-for="(item, index) in items">
-                            <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                                <Button class="w-10 h-10 p-0" :variant="item.value === products.current_page ? 'default' : 'outline'">
-                                    {{ item.value }}
-                                </Button>
-                            </PaginationItem>
-                            <PaginationEllipsis v-else :key="item.type" :index="index" />
-                        </template>
+                <div class="mt-4 flex justify-end">
+                    <Pagination
+                        :total="products.total"
+                        :sibling-count="1"
+                        :items-per-page="products.per_page"
+                        :default-page="products.current_page"
+                        @update:page="onPageChange"
+                    >
+                        <PaginationContent
+                            v-slot="{ items }"
+                            class="flex items-center gap-1"
+                        >
+                            <PaginationFirst />
 
-                        <PaginationNext />
-                        <PaginationLast />
-                    </PaginationContent>
-                </Pagination>
+                            <PaginationPrevious />
+
+                            <template v-for="(item, index) in items">
+                                <PaginationItem
+                                    v-if="item.type === 'page'"
+                                    :key="index"
+                                    :value="item.value"
+                                    as-child
+                                >
+                                    <Button
+                                        class="h-10 w-10 p-0"
+                                        :variant="
+                                            item.value === products.current_page
+                                                ? 'default'
+                                                : 'outline'
+                                        "
+                                    >
+                                        {{ item.value }}
+                                    </Button>
+                                </PaginationItem>
+
+                                <PaginationEllipsis
+                                    v-else
+                                    :key="item.type"
+                                    :index="index"
+                                />
+                            </template>
+
+                            <PaginationNext />
+
+                            <PaginationLast />
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             </div>
         </div>
+
+        <AlertDialog
+            :open="isDeleteDialogOpen"
+            @update:open="isDeleteDialogOpen = $event"
+        >
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle
+                        >Are you absolutely sure?</AlertDialogTitle
+                    >
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete the product and remove all associated data and
+                        images from our servers.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        class="bg-destructive hover:bg-destructive/90"
+                        @click="confirmDelete"
+                    >
+                        Delete Product
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </AdminLayout>
 </template>

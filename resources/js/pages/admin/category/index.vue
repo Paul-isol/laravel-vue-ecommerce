@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Edit, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Pagination,
@@ -39,9 +50,22 @@ defineProps<{
     };
 }>();
 
+const itemToDeleteId = ref<number | null>(null);
+const isDeleteDialogOpen = ref(false);
+
 const deleteCategory = (id: number) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-        router.delete(toUrl(admin.categories.destroy(id)));
+    itemToDeleteId.value = id;
+    isDeleteDialogOpen.value = true;
+};
+
+const confirmDelete = () => {
+    if (itemToDeleteId.value) {
+        router.delete(toUrl(admin.categories.destroy(itemToDeleteId.value)), {
+            onFinish: () => {
+                isDeleteDialogOpen.value = false;
+                itemToDeleteId.value = null;
+            },
+        });
     }
 };
 
@@ -67,38 +91,87 @@ const onPageChange = (page: number) => {
                 </Button>
             </div>
 
-            <div class="rounded-md border bg-card">
+            <div
+                class="overflow-hidden rounded-xl border border-border/50 bg-background shadow-sm"
+            >
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[80px]">ID</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Slug</TableHead>
-                            <TableHead class="text-right">Actions</TableHead>
+                        <TableRow
+                            class="border-b-border/50 hover:bg-transparent"
+                        >
+                            <TableHead
+                                class="w-[80px] text-xs tracking-wider text-muted-foreground uppercase"
+                                >ID</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Name</TableHead
+                            >
+                            <TableHead
+                                class="text-xs tracking-wider text-muted-foreground uppercase"
+                                >Slug</TableHead
+                            >
+                            <TableHead
+                                class="text-right text-xs tracking-wider text-muted-foreground uppercase"
+                                >Actions</TableHead
+                            >
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="category in categories.data" :key="category.id">
-                            <TableCell class="font-medium">
-                                {{ category.id }}
+                        <TableRow
+                            v-for="category in categories.data"
+                            :key="category.id"
+                            class="border-b-border/50 transition-colors hover:bg-muted/40"
+                        >
+                            <TableCell
+                                class="text-xs font-medium text-muted-foreground"
+                            >
+                                #{{ category.id }}
                             </TableCell>
-                            <TableCell>{{ category.name }}</TableCell>
-                            <TableCell>{{ category.slug }}</TableCell>
+                            <TableCell class="font-medium text-foreground">
+                                {{ category.name }}
+                            </TableCell>
+                            <TableCell class="text-muted-foreground">
+                                {{ category.slug }}
+                            </TableCell>
                             <TableCell class="text-right">
-                                <div class="flex justify-end gap-2">
-                                    <Button variant="outline" size="icon" as-child>
-                                        <Link :href="toUrl(admin.categories.edit(category.id))">
+                                <div
+                                    class="flex justify-end gap-1 opacity-80 transition-opacity hover:opacity-100"
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="
+                                                toUrl(
+                                                    admin.categories.edit(
+                                                        category.id,
+                                                    ),
+                                                )
+                                            "
+                                        >
                                             <Edit class="h-4 w-4" />
                                         </Link>
                                     </Button>
-                                    <Button variant="destructive" size="icon" @click="deleteCategory(category.id)">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                        @click="deleteCategory(category.id)"
+                                    >
                                         <Trash2 class="h-4 w-4" />
                                     </Button>
                                 </div>
                             </TableCell>
                         </TableRow>
                         <TableRow v-if="categories.data.length === 0">
-                            <TableCell colspan="4" class="h-24 text-center">
+                            <TableCell
+                                colspan="4"
+                                class="h-32 text-center text-muted-foreground"
+                            >
                                 No categories found.
                             </TableCell>
                         </TableRow>
@@ -106,7 +179,7 @@ const onPageChange = (page: number) => {
                 </Table>
             </div>
 
-            <div class="flex justify-end mt-4">
+            <div class="mt-4 flex justify-end">
                 <Pagination
                     :total="categories.total"
                     :sibling-count="1"
@@ -114,17 +187,36 @@ const onPageChange = (page: number) => {
                     :default-page="categories.current_page"
                     @update:page="onPageChange"
                 >
-                    <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
+                    <PaginationContent
+                        v-slot="{ items }"
+                        class="flex items-center gap-1"
+                    >
                         <PaginationFirst />
                         <PaginationPrevious />
 
                         <template v-for="(item, index) in items">
-                            <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                                <Button class="w-10 h-10 p-0" :variant="item.value === categories.current_page ? 'default' : 'outline'">
+                            <PaginationItem
+                                v-if="item.type === 'page'"
+                                :key="index"
+                                :value="item.value"
+                                as-child
+                            >
+                                <Button
+                                    class="h-10 w-10 p-0"
+                                    :variant="
+                                        item.value === categories.current_page
+                                            ? 'default'
+                                            : 'outline'
+                                    "
+                                >
                                     {{ item.value }}
                                 </Button>
                             </PaginationItem>
-                            <PaginationEllipsis v-else :key="item.type" :index="index" />
+                            <PaginationEllipsis
+                                v-else
+                                :key="item.type"
+                                :index="index"
+                            />
                         </template>
 
                         <PaginationNext />
@@ -133,5 +225,23 @@ const onPageChange = (page: number) => {
                 </Pagination>
             </div>
         </div>
+
+        <AlertDialog :open="isDeleteDialogOpen" @update:open="isDeleteDialogOpen = $event">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the category
+                        and remove all associated data from our servers.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction class="bg-destructive hover:bg-destructive/90" @click="confirmDelete">
+                        Delete Category
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </AdminLayout>
 </template>
